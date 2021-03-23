@@ -69,7 +69,7 @@ metadata:
   namespace: projet
 spec:
   selector:
-    app: rabbitmq # Ici on le lie grace au labels.app.mysql du deployment aussi
+    app: rabbitmq
   ports:
     - name: rabbitmq-port
       port: 15672
@@ -127,7 +127,7 @@ metadata:
   namespace: projet
 spec:
   selector:
-    app: redis # Ici on le lie grace au labels.app.mysql du deployment aussi
+    app: redis
   ports:
     - name: redis-port
       port: 6379
@@ -196,7 +196,7 @@ metadata:
   namespace: projet
 spec:
   selector:
-    app: mssql # Ici on le lie grace au labels.app.mysql du deployment aussi
+    app: mssql
   ports:
     - name: mssql-port
       port: 1433
@@ -311,7 +311,7 @@ metadata:
   namespace: projet
 spec:
   selector:
-    app: applicants # Ici on le lie grace au labels.app.mysql du deployment aussi
+    app: applicants 
   ports:
     - name: applicants-port
       port: 80
@@ -371,7 +371,7 @@ metadata:
   namespace: projet
 spec:
   selector:
-    app: jobs # Ici on le lie grace au labels.app.mysql du deployment aussi
+    app: jobs
   ports:
     - name: jobs-port
       port: 80
@@ -431,7 +431,7 @@ metadata:
   namespace: projet
 spec:
   selector:
-    app: identity # Ici on le lie grace au labels.app.mysql du deployment aussi
+    app: identity
   ports:
     - name: identity-port
       port: 80
