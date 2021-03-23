@@ -1,0 +1,439 @@
+# Namespace 
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: projet
+
+---
+
+# Volume   # On reserve un espace de stockage de 2Gi nommé mysql-volume // Claim est une demande de reservation 
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mssql-volume-claim
+  namespace: projet
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+
+# RabbitMQ Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-deployment
+  namespace: projet
+  labels:
+    app: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+        - image: rabbitmq:3-management
+          name: rabbitmq-container
+          ports:
+            - containerPort: 15672
+              name: rabbitmq-port
+            - containerPort: 5672
+              name: rabbitmq-port2
+          readinessProbe:
+            tcpSocket:
+              port: 15672
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 15672
+            initialDelaySeconds: 30
+            periodSeconds: 20
+      restartPolicy: Always
+
+---
+
+# RabbitMQ Service
+apiVersion: v1  
+kind: Service
+metadata:
+  name: rabbitmq-service
+  namespace: projet
+spec:
+  selector:
+    app: rabbitmq # Ici on le lie grace au labels.app.mysql du deployment aussi
+  ports:
+    - name: rabbitmq-port
+      port: 15672
+      targetPort: 15672
+    - name: rabbitmq-port2
+      port: 5672
+      targetPort: 5672
+  type: ClusterIP
+
+---
+
+# Redis Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+  namespace: projet
+  labels:
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - image: redis
+          name: redis-container
+          ports:
+            - containerPort: 6379
+              name: redis-port
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 30
+            periodSeconds: 20
+      restartPolicy: Always
+
+---
+
+# Redis Service
+apiVersion: v1  
+kind: Service
+metadata:
+  name: redis-service
+  namespace: projet
+spec:
+  selector:
+    app: redis # Ici on le lie grace au labels.app.mysql du deployment aussi
+  ports:
+    - name: redis-port
+      port: 6379
+      targetPort: 6379
+  type: ClusterIP
+
+---
+
+# MsSQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mssql-deployment
+  namespace: projet
+  labels:
+    app: mssql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mssql
+  template:
+    metadata:
+      labels:
+        app: mssql
+    spec:
+      containers:
+        - image: groupe4ynov/mssql-linux:1.0
+          name: mssql-container
+          ports:
+            - containerPort: 1433
+              name: mssql-port
+          volumeMounts:
+          - name: mssql-volume
+            mountPath: /var/opt/mssql
+          resources:
+              requests:
+                memory: 400Mi
+                cpu: 300m
+              limits:
+                memory: 800Mi
+                cpu: 600m
+          readinessProbe:
+            tcpSocket:
+              port: 1433
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 1433
+            initialDelaySeconds: 40
+            periodSeconds: 20
+      volumes:
+      - name: mssql-volume
+        persistentVolumeClaim:
+          claimName: mssql-volume-claim
+      restartPolicy: Always
+
+---
+
+# MsSQL Service
+apiVersion: v1  
+kind: Service
+metadata:
+  name: mssql-service
+  namespace: projet
+spec:
+  selector:
+    app: mssql # Ici on le lie grace au labels.app.mysql du deployment aussi
+  ports:
+    - name: mssql-port
+      port: 1433
+      targetPort: 1433
+  type: ClusterIP
+
+---
+
+# WEB Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webmvc-deployment
+  namespace: projet
+  labels:
+    app: webmvc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: webmvc
+  template:
+    metadata:
+      labels:
+        app: webmvc
+    spec:
+      containers:
+        - image: groupe4ynov/web:1.2 
+          name: webmvc-container
+          ports:
+            - containerPort: 80
+              name: webmvc-port
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
+      restartPolicy: Always
+
+---
+
+# WEB Service
+apiVersion: v1  
+kind: Service
+metadata:
+  name: web-service
+  namespace: projet
+spec:
+  selector:
+    app: webmvc 
+  ports:
+    - name: webmc-port
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+
+---
+
+# Applicant Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: applicants-deployment
+  namespace: projet
+  labels:
+    app: applicants
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: applicants
+  template:
+    metadata:
+      labels:
+        app: applicants
+    spec:
+      containers:
+        - image: groupe4ynov/applicants.api:1.0
+          name: applicants-container
+          env:
+            - name: ConnectionString
+              value: Server=mssql-service;User=sa;Password=Pass@word;Database=dotnetgigs.applicants;
+            - name: HostRabbitmq
+              value: rabbitmq-service
+          ports:
+            - containerPort: 80
+              name: applicants-port
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 40
+            periodSeconds: 20
+      restartPolicy: Always
+
+---
+
+# Applicants Service
+apiVersion: v1  
+kind: Service
+metadata:
+  name: applicants-service
+  namespace: projet
+spec:
+  selector:
+    app: applicants # Ici on le lie grace au labels.app.mysql du deployment aussi
+  ports:
+    - name: applicants-port
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+
+---
+
+# Jobs Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobs-deployment
+  namespace: projet
+  labels:
+    app: jobs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jobs
+  template:
+    metadata:
+      labels:
+        app: jobs
+    spec:
+      containers:
+        - image: groupe4ynov/jobs.api:1.0
+          name: jobs-container
+          env:
+            - name: ConnectionString
+              value: Server=mssql-service;User=sa;Password=Pass@word;Database=dotnetgigs.jobs;
+            - name: HostRabbitmq
+              value: rabbitmq-service
+          ports:
+            - containerPort: 80
+              name: applicants-port
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 40
+            periodSeconds: 20
+      restartPolicy: Always
+
+---
+
+# Jobs Service
+apiVersion: v1  
+kind: Service
+metadata:
+  name: jobs-service
+  namespace: projet
+spec:
+  selector:
+    app: jobs # Ici on le lie grace au labels.app.mysql du deployment aussi
+  ports:
+    - name: jobs-port
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+
+---
+
+# Identity Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-deployment
+  namespace: projet
+  labels:
+    app: identity
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: identity
+  template:
+    metadata:
+      labels:
+        app: identity
+    spec:
+      containers:
+        - image: groupe4ynov/identity.api:1.0
+          name: identity-container
+          env:
+            - name: RedisHost
+              value: redis-service:6379
+            - name: HostRabbitmq
+              value: rabbitmq-service
+          ports:
+            - containerPort: 80
+              name: identity-port
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 40
+            periodSeconds: 20
+      restartPolicy: Always
+
+---
+
+# Identity Service
+apiVersion: v1  
+kind: Service
+metadata:
+  name: identity-service
+  namespace: projet
+spec:
+  selector:
+    app: identity # Ici on le lie grace au labels.app.mysql du deployment aussi
+  ports:
+    - name: identity-port
+      port: 80
+      targetPort: 80
+  type: ClusterIP
