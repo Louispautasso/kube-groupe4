@@ -39,13 +39,36 @@ kubectl create -f allinone.yml
 
 ## Installation de l'application
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
+Il va falloir installer helm sur le cluster Kube
+https://helm.sh/docs/intro/install/
+
+Puis nous allons ajouter un controller d'ingress, pour cela, nous allons utiliser Nginx
+On commence par créer son propre namespace
 
 ```bash
-pip install foobar
+kubectl create namespace ingress-projet
 ```
 
-## Installation du monitoring
+On ajoute le repo ingress-nginx et on le met à jour 
+
+```bash
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
+```
+Puis on install le controller Ingress 
+
+```bash
+helm install nginx-ingress ingress-nginx/ingress-nginx --namespace ingress-projet
+```
+
+Puis nous pouvons creer le projet puis l'ingress
+
+```bash
+kubectl create -f allione.yml
+kubectl create -f ingress.yml
+```
+
+## Installation du monitoring du cluster
 
 Pour la solution de monitoring des metrics avec Prometheus, nous avons fait le choix d'utiliser le helm chart de prometheus officiel, puis nous override les parametres grâce au fichier prometheus/values.yml
 
@@ -65,7 +88,7 @@ helm repo update
 Puis on ajoute le repo helm et on l'update
 
 ```bash
-helm install prometheus prometheus-community/kube-prometheus-stack -f prometheus/values.yml
+helm install prometheus prometheus-community/kube-prometheus-stack -f prometheus/values.yml --namespace monitoring
 ```
 
 ## Usage
