@@ -64,7 +64,7 @@ helm install nginx-ingress ingress-nginx/ingress-nginx --namespace ingress-proje
 Puis nous pouvons creer le projet puis l'ingress
 
 ```bash
-kubectl create -f allione.yml
+kubectl create -f allinone.yml
 kubectl create -f ingress.yml
 ```
 
@@ -105,6 +105,12 @@ Puis on ajoute le repo helm et on l'update
 helm install prometheus prometheus-community/kube-prometheus-stack -f prometheus/values.yml --namespace monitoring
 ```
 
+Puis on créer l'ingress du grafana
+
+```bash
+kubectl create -f prometheus/ingress-prom.yml
+```
+
 Puis ajouter cette ligne dans votre fichier hosts afin que grafana soit accessible, en veillant à remplacer l'ip par l'ip de votre cluster
 
 ```bash
@@ -134,6 +140,14 @@ Changer de context
 kubectl config get-contexts
 kubectl config use-context
 ```
+
+Supprimer un Helm
+
+```bash
+helm list -A
+helm uninstall <name> -n <namespace>
+```
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
