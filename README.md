@@ -37,12 +37,35 @@ Il ne reste plus qu'à lancer la création, sans lancer l'Ingress
 kubectl create -f allinone.yml
 ```
 
-## Installation
+## Installation de l'application
 
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
 
 ```bash
 pip install foobar
+```
+
+## Installation du monitoring
+
+Pour la solution de monitoring des metrics avec Prometheus, nous avons fait le choix d'utiliser le helm chart de prometheus officiel, puis nous override les parametres grâce au fichier prometheus/values.yml
+
+Pour commencer, on créer un nouveau namespace monitoring
+
+```bash
+kubectl create namespace monitoring
+```
+
+Puis on ajoute le repo helm et on l'update
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+```
+
+Puis on ajoute le repo helm et on l'update
+
+```bash
+helm install prometheus prometheus-community/kube-prometheus-stack -f prometheus/values.yml
 ```
 
 ## Usage
