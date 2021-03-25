@@ -115,7 +115,7 @@ alertmanager:
 
   ## Deploy alertmanager
   ##
-  enabled: false
+  enabled: true
 
   ## Api that prometheus will use to communicate with alertmanager. Possible values are v1, v2
   ##
@@ -158,8 +158,6 @@ alertmanager:
         receiver: 'null'
     receivers:
     - name: 'null'
-    templates:
-    - '/etc/alertmanager/config/*.tmpl'
 
   ## Pass the Alertmanager configuration directives through Helm's templating
   ## engine. If the Alertmanager configuration contains Alertmanager templates,
@@ -172,10 +170,6 @@ alertmanager:
   tplConfig: false
 
   ## Alertmanager template files to format alerts
-  ## By default, templateFiles are placed in /etc/alertmanager/config/ and if
-  ## they have a .tmpl file suffix will be loaded. See config.templates above
-  ## to change, add other suffixes. If adding other suffixes, be sure to update
-  ## config.templates above to include those suffixes.
   ## ref: https://prometheus.io/docs/alerting/notifications/
   ##      https://prometheus.io/docs/alerting/notification_examples/
   ##
@@ -220,10 +214,6 @@ alertmanager:
     paths: []
     # - /
 
-    ## For Kubernetes >= 1.18 you should specify the pathType (determines how Ingress paths should be matched)
-    ## See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#better-path-matching-with-path-types
-    # pathType: ImplementationSpecific
-
     ## TLS configuration for Alertmanager Ingress
     ## Secret must be manually created in the namespace
     ##
@@ -263,10 +253,6 @@ alertmanager:
     ##
     paths: []
     # - /
-
-    ## For Kubernetes >= 1.18 you should specify the pathType (determines how Ingress paths should be matched)
-    ## See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#better-path-matching-with-path-types
-    # pathType: ImplementationSpecific
 
     ## Secret name containing the TLS certificate for alertmanager per replica ingress
     ## Secret must be manually created in the namespace
@@ -331,7 +317,7 @@ alertmanager:
     nodePort: 30904
 
     ## Loadbalancer source IP ranges
-    ## Only used if servicePerReplica.type is "LoadBalancer"
+    ## Only used if servicePerReplica.type is "loadbalancer"
     loadBalancerSourceRanges: []
     ## Service type
     ##
@@ -534,17 +520,6 @@ alertmanager:
     #   value: "value"
     #   effect: "NoSchedule"
 
-    ## If specified, the pod's topology spread constraints.
-    ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
-    ##
-    topologySpreadConstraints: []
-    # - maxSkew: 1
-    #   topologyKey: topology.kubernetes.io/zone
-    #   whenUnsatisfiable: DoNotSchedule
-    #   labelSelector:
-    #     matchLabels:
-    #       app: alertmanager
-
     ## SecurityContext holds pod-level security attributes and common container settings.
     ## This defaults to non root user with uid 1000 and gid 2000.	*v1.PodSecurityContext	false
     ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
@@ -610,12 +585,12 @@ grafana:
   ingress:
     ## If true, Grafana Ingress will be created
     ##
-    enabled: true
+    enabled: false
 
     ## Annotations for Grafana Ingress
     ##
-    annotations:
-      # nginx.ingress.kubernetes.io/rewrite-target: /
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
 
     ## Labels to be added to the Ingress
@@ -636,8 +611,7 @@ grafana:
     ## TLS configuration for grafana Ingress
     ## Secret must be manually created in the namespace
     ##
-    tls: 
-      - secretName: projet-1
+    tls: []
     # - secretName: grafana-general-tls
     #   hosts:
     #   - grafana.example.com
@@ -654,9 +628,6 @@ grafana:
     datasources:
       enabled: true
       defaultDatasourceEnabled: true
-
-      # If not defined, will use prometheus.prometheusSpec.scrapeInterval or its default
-      # defaultDatasourceScrapeInterval: 15s
 
       ## Annotations for Grafana datasource configmaps
       ##
@@ -1175,9 +1146,6 @@ kubeStateMetrics:
     ## Scrape interval. If not set, the Prometheus default scrape interval is used.
     ##
     interval: ""
-    ## Override serviceMonitor selector
-    ##
-    selectorOverride: {}
 
     ## 	metric relabel configs to apply to samples before ingestion.
     ##
@@ -1251,22 +1219,19 @@ prometheus-node-exporter:
     ##
     jobLabel: node-exporter
   extraArgs:
-    - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/.+)($|/)
-    - --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$
+    - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/)
+    - --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$
 
 ## Manages Prometheus and Alertmanager components
 ##
 prometheusOperator:
   enabled: true
 
-  ## Prometheus-Operator v0.39.0 and later support TLS natively.
-  ##
+  # Prometheus-Operator v0.39.0 and later support TLS natively.
   tls:
     enabled: true
     # Value must match version names from https://golang.org/pkg/crypto/tls/#pkg-constants
     tlsMinVersion: VersionTLS13
-    # The default webhook port is 10250 in order to work out-of-the-box in GKE private clusters and avoid adding firewall rules.
-    internalPort: 10250
 
   ## Admission webhook support for PrometheusRules resources added in Prometheus Operator 0.30 can be enabled to prevent incorrectly formatted
   ## rules from making their way into prometheus and potentially preventing the container from starting
@@ -1320,12 +1285,6 @@ prometheusOperator:
   prometheusInstanceNamespaces: []
   thanosRulerInstanceNamespaces: []
 
-  ## The clusterDomain value will be added to the cluster.peer option of the alertmanager.
-  ## Without this specified option cluster.peer will have value alertmanager-monitoring-alertmanager-0.alertmanager-operated:9094 (default value)
-  ## With this specified option cluster.peer will have value alertmanager-monitoring-alertmanager-0.alertmanager-operated.namespace.svc.cluster-domain:9094
-  ##
-  # clusterDomain: "cluster.local"
-
   ## Service account for Alertmanager to use.
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
   ##
@@ -1353,13 +1312,13 @@ prometheusOperator:
     additionalPorts: []
 
   ## Loadbalancer IP
-  ## Only use if service.type is "LoadBalancer"
+  ## Only use if service.type is "loadbalancer"
   ##
     loadBalancerIP: ""
     loadBalancerSourceRanges: []
 
   ## Service type
-  ## NodePort, ClusterIP, LoadBalancer
+  ## NodePort, ClusterIP, loadbalancer
   ##
     type: ClusterIP
 
@@ -1462,16 +1421,7 @@ prometheusOperator:
     #         values:
     #         - e2e-az1
     #         - e2e-az2
-  dnsConfig: {}
-    # nameservers:
-    #   - 1.2.3.4
-    # searches:
-    #   - ns1.svc.cluster-domain.example
-    #   - my.dns.search.suffix
-    # options:
-    #   - name: ndots
-    #     value: "2"
-  #   - name: edns0
+
   securityContext:
     fsGroup: 65534
     runAsGroup: 65534
@@ -1482,23 +1432,22 @@ prometheusOperator:
   ##
   image:
     repository: quay.io/prometheus-operator/prometheus-operator
-    tag: v0.46.0
+    tag: v0.44.0
     sha: ""
     pullPolicy: IfNotPresent
 
-  ## Prometheus image to use for prometheuses managed by the operator
+  ## Configmap-reload image to use for reloading configmaps
   ##
-  # prometheusDefaultBaseImage: quay.io/prometheus/prometheus
-
-  ## Alertmanager image to use for alertmanagers managed by the operator
-  ##
-  # alertmanagerDefaultBaseImage: quay.io/prometheus/alertmanager
+  configmapReloadImage:
+    repository: docker.io/jimmidyson/configmap-reload
+    tag: v0.4.0
+    sha: ""
 
   ## Prometheus-config-reloader image to use for config and rule reloading
   ##
   prometheusConfigReloaderImage:
     repository: quay.io/prometheus-operator/prometheus-config-reloader
-    tag: v0.46.0
+    tag: v0.44.0
     sha: ""
 
   ## Set the prometheus config reloader side-car CPU limit
@@ -1530,27 +1479,6 @@ prometheus:
     create: true
     name: ""
 
-  # Service for thanos service discovery on sidecar
-  # Enable this can make Thanos Query can use
-  # `--store=dnssrv+_grpc._tcp.${kube-prometheus-stack.fullname}-thanos-discovery.${namespace}.svc.cluster.local` to discovery
-  # Thanos sidecar on prometheus nodes
-  # (Please remember to change ${kube-prometheus-stack.fullname} and ${namespace}. Not just copy and paste!)
-  thanosService:
-    enabled: false
-    annotations: {}
-    labels: {}
-    portName: grpc
-    port: 10901
-    targetPort: "grpc"
-
-    ## Service type
-    ##
-    type: ClusterIP
-
-    ## Port to expose on each node
-    ##
-    nodePort: 30901
-
   ## Configuration for Prometheus service
   ##
   service:
@@ -1576,7 +1504,7 @@ prometheus:
     nodePort: 30090
 
     ## Loadbalancer IP
-    ## Only use if service.type is "LoadBalancer"
+    ## Only use if service.type is "loadbalancer"
     loadBalancerIP: ""
     loadBalancerSourceRanges: []
     ## Service type
@@ -1604,7 +1532,7 @@ prometheus:
     nodePort: 30091
 
     ## Loadbalancer source IP ranges
-    ## Only used if servicePerReplica.type is "LoadBalancer"
+    ## Only used if servicePerReplica.type is "loadbalancer"
     loadBalancerSourceRanges: []
     ## Service type
     ##
@@ -1631,12 +1559,6 @@ prometheus:
     annotations: {}
     labels: {}
     servicePort: 10901
-
-    ## Port to expose on each node
-    ## Only used if service.type is 'NodePort'
-    ##
-    nodePort: 30901
-
     ## Hosts must be provided if Ingress is enabled.
     ##
     hosts: []
@@ -1646,10 +1568,6 @@ prometheus:
     ##
     paths: []
     # - /
-
-    ## For Kubernetes >= 1.18 you should specify the pathType (determines how Ingress paths should be matched)
-    ## See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#better-path-matching-with-path-types
-    # pathType: ImplementationSpecific
 
     ## TLS configuration for Thanos Ingress
     ## Secret must be manually created in the namespace
@@ -1680,10 +1598,6 @@ prometheus:
     ##
     paths: []
     # - /
-
-    ## For Kubernetes >= 1.18 you should specify the pathType (determines how Ingress paths should be matched)
-    ## See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#better-path-matching-with-path-types
-    # pathType: ImplementationSpecific
 
     ## TLS configuration for Prometheus Ingress
     ## Secret must be manually created in the namespace
@@ -1720,10 +1634,6 @@ prometheus:
     paths: []
     # - /
 
-    ## For Kubernetes >= 1.18 you should specify the pathType (determines how Ingress paths should be matched)
-    ## See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#better-path-matching-with-path-types
-    # pathType: ImplementationSpecific
-
     ## Secret name containing the TLS certificate for Prometheus per replica ingress
     ## Secret must be manually created in the namespace
     tlsSecretName: ""
@@ -1741,8 +1651,6 @@ prometheus:
   ## ref: https://kubernetes.io/docs/concepts/policy/pod-security-policy/
   podSecurityPolicy:
     allowedCapabilities: []
-    allowedHostPaths: []
-    volumes: []
 
   serviceMonitor:
     ## Scrape interval. If not set, the Prometheus default scrape interval is used.
@@ -1816,7 +1724,7 @@ prometheus:
     ##
     image:
       repository: quay.io/prometheus/prometheus
-      tag: v2.24.0
+      tag: v2.22.1
       sha: ""
 
     ## Tolerations for use with node taints
@@ -1827,17 +1735,6 @@ prometheus:
     #    operator: "Equal"
     #    value: "value"
     #    effect: "NoSchedule"
-
-    ## If specified, the pod's topology spread constraints.
-    ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
-    ##
-    topologySpreadConstraints: []
-    # - maxSkew: 1
-    #   topologyKey: topology.kubernetes.io/zone
-    #   whenUnsatisfiable: DoNotSchedule
-    #   labelSelector:
-    #     matchLabels:
-    #       app: prometheus
 
     ## Alertmanagers to which alerts will be sent
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#alertmanagerendpoints
@@ -1913,10 +1810,10 @@ prometheus:
     ruleSelectorNilUsesHelmValues: true
 
     ## PrometheusRules to be selected for target discovery.
-    ## If {}, select all PrometheusRules
+    ## If {}, select all ServiceMonitors
     ##
     ruleSelector: {}
-    ## Example which select all PrometheusRules resources
+    ## Example which select all prometheusrules resources
     ## with label "prometheus" with values any of "example-rules" or "example-rules-2"
     # ruleSelector:
     #   matchExpressions:
@@ -1926,7 +1823,7 @@ prometheus:
     #         - example-rules
     #         - example-rules-2
     #
-    ## Example which select all PrometheusRules resources with label "role" set to "example-rules"
+    ## Example which select all prometheusrules resources with label "role" set to "example-rules"
     # ruleSelector:
     #   matchLabels:
     #     role: example-rules
@@ -1947,12 +1844,9 @@ prometheus:
     #     prometheus: somelabel
 
     ## Namespaces to be selected for ServiceMonitor discovery.
+    ## See https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#namespaceselector for usage
     ##
     serviceMonitorNamespaceSelector: {}
-    ## Example which selects ServiceMonitors in namespaces with label "prometheus" set to "somelabel"
-    # serviceMonitorNamespaceSelector:
-    #   matchLabels:
-    #     prometheus: somelabel
 
     ## If true, a nil or {} value for prometheus.prometheusSpec.podMonitorSelector will cause the
     ## prometheus resource to be created with selectors based on values in the helm deployment,
@@ -2010,19 +1904,9 @@ prometheus:
     ##
     paused: false
 
-    ## Number of replicas of each shard to deploy for a Prometheus deployment.
-    ## Number of replicas multiplied by shards is the total number of Pods created.
+    ## Number of Prometheus replicas desired
     ##
     replicas: 1
-
-    ## EXPERIMENTAL: Number of shards to distribute targets onto.
-    ## Number of replicas multiplied by shards is the total number of Pods created.
-    ## Note that scaling down shards will not reshard data onto remaining instances, it must be manually moved.
-    ## Increasing shards will not reshard data either but it will continue to be available from the same instances.
-    ## To query globally use Thanos sidecar and Thanos querier or remote write data to a central location.
-    ## Sharding is done on the content of the `__address__` target meta-label.
-    ##
-    shards: 1
 
     ## Log level for Prometheus be configured in
     ##
@@ -2244,14 +2128,9 @@ prometheus:
     ## configs, and they will only discover endpoints within their current namespace. Defaults to false.
     ignoreNamespaceSelectors: false
 
-    ## EnforcedNamespaceLabel enforces adding a namespace label of origin for each alert and metric that is user created.
-    ## The label value will always be the namespace of the object that is being created.
-    ## Disabled by default
-    enforcedNamespaceLabel: ""
-
     ## PrometheusRulesExcludedFromEnforce - list of prometheus rules to be excluded from enforcing of adding namespace labels.
     ## Works only if enforcedNamespaceLabel set to true. Make sure both ruleNamespace and ruleName are set for each pair
-    prometheusRulesExcludedFromEnforce: []
+    prometheusRulesExcludedFromEnforce: false
 
     ## QueryLogFile specifies the file to which PromQL queries are logged. Note that this location must be writable,
     ## and can be persisted using an attached volume. Alternatively, the location can be set to a stdout location such
@@ -2291,11 +2170,7 @@ prometheus:
 
     ## labels to transfer from the kubernetes service to the target
     ##
-    # targetLabels: []
-
-    ## labels to transfer from the kubernetes pods to the target
-    ##
-    # podTargetLabels: []
+    # targetLabels: ""
 
     ## Label selector for services to which this ServiceMonitor applies
     ##
