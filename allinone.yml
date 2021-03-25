@@ -57,6 +57,13 @@ spec:
               port: 15672
             initialDelaySeconds: 30
             periodSeconds: 20
+          resources:
+            requests:
+              memory: 300Mi
+              cpu: 4m
+            limits:
+              memory: 800Mi
+              cpu: 8m
       restartPolicy: Always
 
 ---
@@ -115,6 +122,13 @@ spec:
               port: 6379
             initialDelaySeconds: 30
             periodSeconds: 20
+          resources:
+            requests:
+              memory: 100Mi
+              cpu: 4m
+            limits:
+              memory: 800Mi
+              cpu: 8m
       restartPolicy: Always
 
 ---
@@ -163,13 +177,6 @@ spec:
           volumeMounts:
           - name: mssql-volume
             mountPath: /var/opt/mssql
-          resources:
-              requests:
-                memory: 400Mi
-                cpu: 300m
-              limits:
-                memory: 800Mi
-                cpu: 600m
           readinessProbe:
             tcpSocket:
               port: 1433
@@ -180,6 +187,13 @@ spec:
               port: 1433
             initialDelaySeconds: 40
             periodSeconds: 20
+          resources:
+            requests:
+              memory: 1500Mi
+              cpu: 170m
+            limits:
+              memory: 2500Mi
+              cpu: 250m
       volumes:
       - name: mssql-volume
         persistentVolumeClaim:
@@ -239,6 +253,13 @@ spec:
               port: 80
             initialDelaySeconds: 15
             periodSeconds: 20
+          resources:
+            requests:
+              memory: 500Mi
+              cpu: 4m
+            limits:
+              memory: 1000Mi
+              cpu: 6m
       restartPolicy: Always
 
 ---
@@ -299,6 +320,13 @@ spec:
               port: 80
             initialDelaySeconds: 40
             periodSeconds: 20
+          resources:
+            requests:
+              memory: 200Mi
+              cpu: 3m
+            limits:
+              memory: 1000Mi
+              cpu: 6m
       restartPolicy: Always
 
 ---
@@ -359,6 +387,13 @@ spec:
               port: 80
             initialDelaySeconds: 40
             periodSeconds: 20
+          resources:
+            requests:
+              memory: 200Mi
+              cpu: 3m
+            limits:
+              memory: 1000Mi
+              cpu: 6m
       restartPolicy: Always
 
 ---
@@ -419,6 +454,13 @@ spec:
               port: 80
             initialDelaySeconds: 40
             periodSeconds: 20
+          resources:
+            requests:
+              memory: 200Mi
+              cpu: 3m
+            limits:
+              memory: 1000Mi
+              cpu: 6m
       restartPolicy: Always
 
 ---
