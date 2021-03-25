@@ -68,6 +68,13 @@ kubectl create -f allione.yml
 kubectl create -f ingress.yml
 ```
 
+Pour aller plus loin, nous avons configuré un vhost pour les tests
+Il faut aller modifier le fichier hosts, et mettre l'ip de l'ingress avec le siteweb
+
+```bash
+51.138.220.100	siteweb.example.com
+```
+
 ## Installation du monitoring du cluster
 
 Pour la solution de monitoring des metrics avec Prometheus, nous avons fait le choix d'utiliser le helm chart de prometheus officiel, puis nous override les parametres grâce au fichier prometheus/values.yml
@@ -89,6 +96,12 @@ Puis on ajoute le repo helm et on l'update
 
 ```bash
 helm install prometheus prometheus-community/kube-prometheus-stack -f prometheus/values.yml --namespace monitoring
+```
+
+Puis ajouter cette ligne dans votre fichier hosts afin que grafana soit accessible, en veillant à remplacer l'ip par l'ip de votre cluster
+
+```bash
+51.138.220.100	grafana.example.com
 ```
 
 ## Usage
