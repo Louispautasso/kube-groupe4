@@ -5,8 +5,10 @@ metadata:
   namespace: projet
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "false" # or true permet la redirection ou non vers le https
+    nginx.ingress.kubernetes.io/ssl-redirect: "true" # or true permet la redirection ou non vers le https
 spec:
+  tls:
+  - secretName: projet-1
   rules:
   - host: siteweb.example.com
     http: 
