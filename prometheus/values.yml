@@ -115,7 +115,7 @@ alertmanager:
 
   ## Deploy alertmanager
   ##
-  enabled: true
+  enabled: false
 
   ## Api that prometheus will use to communicate with alertmanager. Possible values are v1, v2
   ##
@@ -615,7 +615,7 @@ grafana:
     ## Annotations for Grafana Ingress
     ##
     annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: /
+      # nginx.ingress.kubernetes.io/rewrite-target: /
       # kubernetes.io/tls-acme: "true"
 
     ## Labels to be added to the Ingress
@@ -627,7 +627,8 @@ grafana:
     ##
     # hosts:
     #   - grafana.domain.com
-    hosts: []
+    hosts: 
+        - grafana.example.com
 
     ## Path for grafana ingress
     path: /
