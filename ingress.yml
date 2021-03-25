@@ -8,7 +8,7 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "false" # or true permet la redirection ou non vers le https
 spec:
   rules:
-  - host: 
+  - host: siteweb.example.com
     http: 
       paths:
       - path: /
