@@ -101,6 +101,19 @@ foobar.pluralize('goose') # returns 'geese'
 foobar.singularize('phenomena') # returns 'phenomenon'
 ```
 
+## Commandes utiles
+Se connecter au Cluster azure
+
+```bash
+az aks get-credentials --resource-group groupe4 --name clus4
+```
+
+Changer de context
+
+```bash
+kubectl config get-contexts
+kubectl config use-context
+```
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
