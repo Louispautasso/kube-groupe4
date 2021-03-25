@@ -68,12 +68,18 @@ kubectl create -f allione.yml
 kubectl create -f ingress.yml
 ```
 
+Installation des certificats 
+```bash
+kubectl create secret tls projet-1 --cert certificats/projet-1.crt --key certificats/projet-1.key
+```
+
 Pour aller plus loin, nous avons configuré un vhost pour les tests
 Il faut aller modifier le fichier hosts, et mettre l'ip de l'ingress avec le siteweb
 
 ```bash
 51.138.220.100	siteweb.example.com
 ```
+
 
 ## Installation du monitoring du cluster
 
