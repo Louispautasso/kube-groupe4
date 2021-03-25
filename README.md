@@ -77,7 +77,8 @@ Il faut aller modifier le fichier hosts, et mettre l'ip de l'ingress avec le sit
 
 ## Installation du monitoring du cluster
 
-Pour la solution de monitoring des metrics avec Prometheus, nous avons fait le choix d'utiliser le helm chart de prometheus officiel, puis nous override les parametres grâce au fichier prometheus/values.yml
+Doc utile: https://medium.com/codex/setup-kuberhealthy-with-prometheus-and-grafana-on-minikube-b2f6da21dc2e
+Pour la solution de monitoring des metrics avec Prometheus, nous avons fait le choix d'utiliser le helm chart de prometheus officiel, puis nous override les parametres grâce au fichier prometheus/values.yml.
 
 Pour commencer, on créer un nouveau namespace monitoring
 
