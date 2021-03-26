@@ -1,7 +1,7 @@
 # Kubernetes Project for Ynov - Groupe 4
 
 Ce projet a été créer dans le but de fonctionner sur un Cluster Kubernetes. Ce cluster pourra être installer sur un cloud provider comme sur un cluster kube local.
-
+Le repo pour déployer via Helm est ici : https://github.com/Louispautasso/kube-ynov
 ## Outils
 
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
