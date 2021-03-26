@@ -148,6 +148,29 @@ helm list -A
 helm uninstall <name> -n <namespace>
 ```
 
+## Doc utiles
+
+Création de la partie monitoring des metrics avec Prometheus
+```bash
+https://medium.com/codex/setup-kuberhealthy-with-prometheus-and-grafana-on-minikube-b2f6da21dc2e
+```
+
+Création des sondes de vivacité et de préparation
+```bash
+https://linuxintosh.wordpress.com/2020/12/28/k8s-les-differents-types-de-sondes/
+```
+
+Création des règles d'affinités
+```bash
+https://docs.openshift.com/container-platform/3.6/admin_guide/scheduling/pod_affinity.html
+https://stackoverflow.com/questions/62292476/deployment-affinity
+```
+
+Création de la partie monitoring des logs avec EFK
+```bash
+ZBLAAAA
+```
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
