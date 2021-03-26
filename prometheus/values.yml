@@ -585,7 +585,7 @@ grafana:
   ingress:
     ## If true, Grafana Ingress will be created
     ##
-    enabled: false
+    enabled: true
 
     ## Annotations for Grafana Ingress
     ##
