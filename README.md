@@ -81,7 +81,7 @@ Il faut aller modifier le fichier hosts, et mettre l'ip de l'ingress avec le sit
 ```
 
 
-## Installation du monitoring du cluster
+## Installation du monitoring des metrics du cluster
 
 Doc utile: https://medium.com/codex/setup-kuberhealthy-with-prometheus-and-grafana-on-minikube-b2f6da21dc2e
 Pour la solution de monitoring des metrics avec Prometheus, nous avons fait le choix d'utiliser le helm chart de prometheus officiel, puis nous override les parametres grâce au fichier prometheus/values.yml.
@@ -117,6 +117,46 @@ Puis ajouter cette ligne dans votre fichier hosts afin que grafana soit accessib
 51.138.220.100	grafana.example.com
 ```
 
+## Installation du monitoring des metrics du cluster
+
+Doc utile: https://www.digitalocean.com/community/tutorials/how-to-set-up-an-elasticsearch-fluentd-and-kibana-efk-logging-stack-on-kubernetes#step-2-%E2%80%94-creating-the-elasticsearch-statefulset
+L'installation d'EFK va nous servir à afficher l'ensemble des logs de notre cluster kubernetes.
+
+Pour commencer, on créer un nouveau namespace kube-logging
+
+```bash
+kubectl create -f efk/namespace.yml
+```
+
+Ensuite nous allons créer les cluster ElasticSearch
+
+```bash
+kubectl create -f efk/elastic/elasticsearch.yml
+```
+
+Après nous allons créer notre Kibana
+
+```bash
+kubectl create -f efk/kibana/kibana.yml
+```
+
+Puis nous allons ajouter le petit Fluentd
+
+```bash
+kubectl create -f efk/fluentd/fluentd.yml
+```
+
+Et enfin, nous créons l'ingress
+
+```bash
+kubectl create -f efk/ingress.yml
+```
+
+Pour acceder à votre Kibana plus simplement, ajoutez cette ligne avec l'ip du cluster dans votre fichier hosts
+
+```bash
+51.138.220.100	kibana.example.com
+```
 ## Usage
 
 ```python
@@ -168,7 +208,7 @@ https://stackoverflow.com/questions/62292476/deployment-affinity
 
 Création de la partie monitoring des logs avec EFK
 ```bash
-ZBLAAAA
+https://www.digitalocean.com/community/tutorials/how-to-set-up-an-elasticsearch-fluentd-and-kibana-efk-logging-stack-on-kubernetes#step-2-%E2%80%94-creating-the-elasticsearch-statefulset
 ```
 
 ## Contributing
