@@ -50,20 +50,20 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 15672
-            initialDelaySeconds: 30
+            initialDelaySeconds: 120
             periodSeconds: 10
           livenessProbe:
             tcpSocket:
               port: 15672
-            initialDelaySeconds: 30
+            initialDelaySeconds: 120
             periodSeconds: 20
-          resources:
-            requests:
-              memory: 300Mi
-              cpu: 4m
-            limits:
-              memory: 800Mi
-              cpu: 8m
+#          resources:
+#            requests:
+#              memory: 300Mi
+#              cpu: 4m
+#            limits:
+#              memory: 800Mi
+#              cpu: 8m
       restartPolicy: Always
 
 ---
@@ -115,20 +115,20 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 6379
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 10
           livenessProbe:
             tcpSocket:
               port: 6379
-            initialDelaySeconds: 30
+            initialDelaySeconds: 60
             periodSeconds: 20
-          resources:
-            requests:
-              memory: 100Mi
-              cpu: 4m
-            limits:
-              memory: 800Mi
-              cpu: 8m
+#          resources:
+#            requests:
+#              memory: 100Mi
+#              cpu: 4m
+#            limits:
+#              memory: 800Mi
+#              cpu: 8m
       restartPolicy: Always
 
 ---
@@ -180,20 +180,20 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 1433
-            initialDelaySeconds: 40
+            initialDelaySeconds: 120
             periodSeconds: 10
           livenessProbe:
             tcpSocket:
               port: 1433
-            initialDelaySeconds: 40
+            initialDelaySeconds: 120
             periodSeconds: 20
-          resources:
-            requests:
-              memory: 1500Mi
-              cpu: 170m
-            limits:
-              memory: 2500Mi
-              cpu: 250m
+#          resources:
+#            requests:
+#              memory: 1500Mi
+#              cpu: 170m
+#            limits:
+#              memory: 2500Mi
+#              cpu: 250m
       volumes:
       - name: mssql-volume
         persistentVolumeClaim:
@@ -237,6 +237,17 @@ spec:
       labels:
         app: webmvc
     spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - jobs
+                - applicants
+            topologyKey: "kubernetes.io/hostname"
       containers:
         - image: groupe4ynov/web:1.2 
           name: webmvc-container
@@ -246,20 +257,20 @@ spec:
           readinessProbe:
             tcpSocket:
               port: 80
-            initialDelaySeconds: 5
+            initialDelaySeconds: 60
             periodSeconds: 10
           livenessProbe:
             tcpSocket:
               port: 80
-            initialDelaySeconds: 15
+            initialDelaySeconds: 60
             periodSeconds: 20
-          resources:
-            requests:
-              memory: 500Mi
-              cpu: 4m
-            limits:
-              memory: 1000Mi
-              cpu: 6m
+#          resources:
+#            requests:
+#              memory: 500Mi
+#              cpu: 4m
+#            limits:
+#              memory: 1000Mi
+#              cpu: 6m
       restartPolicy: Always
 
 ---
@@ -299,6 +310,16 @@ spec:
       labels:
         app: applicants
     spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - mssql
+            topologyKey: "kubernetes.io/hostname"
       containers:
         - image: groupe4ynov/applicants.api:1.0
           name: applicants-container
@@ -320,13 +341,13 @@ spec:
               port: 80
             initialDelaySeconds: 40
             periodSeconds: 20
-          resources:
-            requests:
-              memory: 200Mi
-              cpu: 3m
-            limits:
-              memory: 1000Mi
-              cpu: 6m
+#          resources:
+#            requests:
+#              memory: 200Mi
+#              cpu: 3m
+#            limits:
+#              memory: 1000Mi
+#              cpu: 6m
       restartPolicy: Always
 
 ---
@@ -366,6 +387,16 @@ spec:
       labels:
         app: jobs
     spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - mssql
+            topologyKey: "kubernetes.io/hostname"
       containers:
         - image: groupe4ynov/jobs.api:1.0
           name: jobs-container
@@ -387,13 +418,13 @@ spec:
               port: 80
             initialDelaySeconds: 40
             periodSeconds: 20
-          resources:
-            requests:
-              memory: 200Mi
-              cpu: 3m
-            limits:
-              memory: 1000Mi
-              cpu: 6m
+#          resources:
+#            requests:
+#              memory: 200Mi
+#              cpu: 3m
+#            limits:
+#              memory: 1000Mi
+#              cpu: 6m
       restartPolicy: Always
 
 ---
@@ -433,6 +464,16 @@ spec:
       labels:
         app: identity
     spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - redis
+            topologyKey: "kubernetes.io/hostname"
       containers:
         - image: groupe4ynov/identity.api:1.0
           name: identity-container
@@ -454,13 +495,13 @@ spec:
               port: 80
             initialDelaySeconds: 40
             periodSeconds: 20
-          resources:
-            requests:
-              memory: 200Mi
-              cpu: 3m
-            limits:
-              memory: 1000Mi
-              cpu: 6m
+#          resources:
+#            requests:
+#              memory: 200Mi
+#              cpu: 3m
+#            limits:
+#              memory: 1000Mi
+#              cpu: 6m
       restartPolicy: Always
 
 ---
