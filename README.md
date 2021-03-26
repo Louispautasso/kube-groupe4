@@ -81,7 +81,7 @@ Il faut aller modifier le fichier hosts, et mettre l'ip de l'ingress avec le sit
 ```
 
 
-## Installation du monitoring des metrics du cluster
+## Installation du monitoring des metrics du cluster - Prometheus & Grafana
 
 Doc utile: https://medium.com/codex/setup-kuberhealthy-with-prometheus-and-grafana-on-minikube-b2f6da21dc2e
 Pour la solution de monitoring des metrics avec Prometheus, nous avons fait le choix d'utiliser le helm chart de prometheus officiel, puis nous override les parametres grâce au fichier prometheus/values.yml.
@@ -89,7 +89,7 @@ Pour la solution de monitoring des metrics avec Prometheus, nous avons fait le c
 Pour commencer, on créer un nouveau namespace monitoring
 
 ```bash
-kubectl create namespace monitoring
+kubectl create -f prometheus/namespace.yml
 ```
 
 Puis on ajoute le repo helm et on l'update
@@ -99,7 +99,7 @@ helm repo add prometheus-community https://prometheus-community.github.io/helm-c
 helm repo update
 ```
 
-Puis on ajoute le repo helm et on l'update
+Puis on lance l'installation du Chart Helm avec notre fichier de valeurs et dans le namespace qu'on souhaite
 
 ```bash
 helm install prometheus prometheus-community/kube-prometheus-stack -f prometheus/values.yml --namespace monitoring
@@ -108,7 +108,7 @@ helm install prometheus prometheus-community/kube-prometheus-stack -f prometheus
 Puis on créer l'ingress du grafana
 
 ```bash
-kubectl create -f prometheus/ingress-prom.yml
+kubectl create -f prometheus/ingress.yml
 ```
 
 Puis ajouter cette ligne dans votre fichier hosts afin que grafana soit accessible, en veillant à remplacer l'ip par l'ip de votre cluster
@@ -117,7 +117,7 @@ Puis ajouter cette ligne dans votre fichier hosts afin que grafana soit accessib
 51.138.220.100	grafana.example.com
 ```
 
-## Installation du monitoring des metrics du cluster
+## Installation du monitoring des Logs du cluster - EFK
 
 Doc utile: https://www.digitalocean.com/community/tutorials/how-to-set-up-an-elasticsearch-fluentd-and-kibana-efk-logging-stack-on-kubernetes#step-2-%E2%80%94-creating-the-elasticsearch-statefulset
 L'installation d'EFK va nous servir à afficher l'ensemble des logs de notre cluster kubernetes.
