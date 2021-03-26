@@ -105,12 +105,6 @@ Puis on lance l'installation du Chart Helm avec notre fichier de valeurs et dans
 helm install prometheus prometheus-community/kube-prometheus-stack -f prometheus/values.yml --namespace monitoring
 ```
 
-Puis on créer l'ingress du grafana
-
-```bash
-kubectl create -f prometheus/ingress.yml
-```
-
 Puis ajouter cette ligne dans votre fichier hosts afin que grafana soit accessible, en veillant à remplacer l'ip par l'ip de votre cluster
 
 ```bash
